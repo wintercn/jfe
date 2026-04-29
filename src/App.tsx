@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { docs } from './docs';
 import { formatJson, getDefaultValue } from './widgets/json';
 import type { JsonValue, WidgetSpec } from './widgets/types';
 import { WidgetEditor } from './widgets/WidgetEditor';
@@ -8,6 +9,8 @@ type Demo = {
   label: string;
   spec: WidgetSpec;
 };
+
+type Mode = 'cases' | 'docs';
 
 const demos: Demo[] = [
   {
@@ -376,8 +379,14 @@ const demos: Demo[] = [
 ];
 
 export function App() {
+  const [mode, setMode] = useState<Mode>('cases');
   const [selectedId, setSelectedId] = useState(demos[0].id);
   const selectedDemo = useMemo(() => demos.find((demo) => demo.id === selectedId) ?? demos[0], [selectedId]);
+  const [selectedDocId, setSelectedDocId] = useState(docs[0].id);
+  const selectedDoc = useMemo(
+    () => docs.find((doc) => doc.id === selectedDocId) ?? docs[0],
+    [selectedDocId],
+  );
   const [value, setValue] = useState<JsonValue>(() => getDefaultValue(selectedDemo.spec));
 
   useEffect(() => {
@@ -388,40 +397,238 @@ export function App() {
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">JFE Workbench</div>
+        <div className="top-tabs" role="tablist" aria-label="Site sections">
+          <button
+            className={mode === 'cases' ? 'top-tab active' : 'top-tab'}
+            type="button"
+            onClick={() => setMode('cases')}
+          >
+            Cases
+          </button>
+          <button
+            className={mode === 'docs' ? 'top-tab active' : 'top-tab'}
+            type="button"
+            onClick={() => setMode('docs')}
+          >
+            Docs
+          </button>
+        </div>
       </header>
       <div className="workspace">
         <aside className="sidebar">
-          <div className="panel-title">Widgets</div>
-          <nav className="nav-list" aria-label="Widget demos">
-            {demos.map((demo) => (
-              <button
-                className={demo.id === selectedId ? 'nav-item active' : 'nav-item'}
-                key={demo.id}
-                type="button"
-                onClick={() => setSelectedId(demo.id)}
-              >
-                {demo.label}
-              </button>
-            ))}
-          </nav>
+          {mode === 'cases' ? (
+            <>
+              <div className="panel-title">Cases</div>
+              <nav className="nav-list" aria-label="Widget cases">
+                {demos.map((demo) => (
+                  <button
+                    className={demo.id === selectedId ? 'nav-item active' : 'nav-item'}
+                    key={demo.id}
+                    type="button"
+                    onClick={() => setSelectedId(demo.id)}
+                  >
+                    {demo.label}
+                  </button>
+                ))}
+              </nav>
+            </>
+          ) : (
+            <>
+              <div className="panel-title">Docs</div>
+              <nav className="nav-list" aria-label="Documentation">
+                {docs.map((doc) => (
+                  <button
+                    className={doc.id === selectedDocId ? 'nav-item active' : 'nav-item'}
+                    key={doc.id}
+                    type="button"
+                    onClick={() => setSelectedDocId(doc.id)}
+                  >
+                    {doc.label}
+                  </button>
+                ))}
+              </nav>
+            </>
+          )}
         </aside>
         <main className="editor-pane">
-          <section className="panel editor-panel">
-            <div className="panel-title">{selectedDemo.label}</div>
-            <WidgetEditor spec={selectedDemo.spec} value={value} onChange={setValue} />
-          </section>
+          {mode === 'cases' ? (
+            <section className="panel editor-panel">
+              <div className="panel-title">{selectedDemo.label}</div>
+              <WidgetEditor spec={selectedDemo.spec} value={value} onChange={setValue} />
+            </section>
+          ) : (
+            <section className="panel doc-panel">
+              <div className="panel-title">{selectedDoc.label}</div>
+              <MarkdownDoc content={selectedDoc.content} />
+            </section>
+          )}
         </main>
         <aside className="inspector">
-          <section className="panel">
-            <div className="panel-title">Value</div>
-            <pre className="code-block">{formatJson(value)}</pre>
-          </section>
-          <section className="panel">
-            <div className="panel-title">DSL</div>
-            <pre className="code-block">{formatJson(selectedDemo.spec)}</pre>
-          </section>
+          {mode === 'cases' ? (
+            <>
+              <section className="panel">
+                <div className="panel-title">Value</div>
+                <pre className="code-block">{formatJson(value)}</pre>
+              </section>
+              <section className="panel">
+                <div className="panel-title">DSL</div>
+                <pre className="code-block">{formatJson(selectedDemo.spec)}</pre>
+              </section>
+            </>
+          ) : (
+            <>
+              <section className="panel">
+                <div className="panel-title">File</div>
+                <pre className="code-block">{selectedDoc.path}</pre>
+              </section>
+              <section className="panel">
+                <div className="panel-title">Markdown</div>
+                <pre className="code-block">{selectedDoc.content}</pre>
+              </section>
+            </>
+          )}
         </aside>
       </div>
     </div>
   );
+}
+
+function MarkdownDoc({ content }: { content: string }) {
+  const blocks = parseMarkdown(content);
+
+  return (
+    <article className="markdown-doc">
+      {blocks.map((block, index) => {
+        switch (block.type) {
+          case 'heading':
+            return block.level === 1 ? (
+              <h1 key={index}>{renderInline(block.text)}</h1>
+            ) : (
+              <h2 key={index}>{renderInline(block.text)}</h2>
+            );
+          case 'list':
+            return (
+              <ul key={index}>
+                {block.items.map((item, itemIndex) => (
+                  <li key={itemIndex}>{renderInline(item)}</li>
+                ))}
+              </ul>
+            );
+          case 'code':
+            return (
+              <pre className="doc-code" key={index}>
+                <code>{block.code}</code>
+              </pre>
+            );
+          case 'paragraph':
+            return <p key={index}>{renderInline(block.text)}</p>;
+        }
+      })}
+    </article>
+  );
+}
+
+type MarkdownBlock =
+  | { type: 'heading'; level: 1 | 2; text: string }
+  | { type: 'paragraph'; text: string }
+  | { type: 'list'; items: string[] }
+  | { type: 'code'; code: string };
+
+function parseMarkdown(content: string): MarkdownBlock[] {
+  const blocks: MarkdownBlock[] = [];
+  const lines = content.split('\n');
+  let paragraph: string[] = [];
+  let list: string[] = [];
+  let code: string[] | undefined;
+
+  const flushParagraph = () => {
+    if (paragraph.length > 0) {
+      blocks.push({ type: 'paragraph', text: paragraph.join(' ') });
+      paragraph = [];
+    }
+  };
+
+  const flushList = () => {
+    if (list.length > 0) {
+      blocks.push({ type: 'list', items: list });
+      list = [];
+    }
+  };
+
+  lines.forEach((line) => {
+    if (line.startsWith('```')) {
+      flushParagraph();
+      flushList();
+      if (code) {
+        blocks.push({ type: 'code', code: code.join('\n') });
+        code = undefined;
+      } else {
+        code = [];
+      }
+      return;
+    }
+
+    if (code) {
+      code.push(line);
+      return;
+    }
+
+    if (line.trim() === '') {
+      flushParagraph();
+      flushList();
+      return;
+    }
+
+    if (line.startsWith('# ')) {
+      flushParagraph();
+      flushList();
+      blocks.push({ type: 'heading', level: 1, text: line.slice(2) });
+      return;
+    }
+
+    if (line.startsWith('## ')) {
+      flushParagraph();
+      flushList();
+      blocks.push({ type: 'heading', level: 2, text: line.slice(3) });
+      return;
+    }
+
+    if (line.startsWith('- ')) {
+      flushParagraph();
+      list.push(line.slice(2));
+      return;
+    }
+
+    paragraph.push(line.trim());
+  });
+
+  flushParagraph();
+  flushList();
+
+  if (code) {
+    blocks.push({ type: 'code', code: code.join('\n') });
+  }
+
+  return blocks;
+}
+
+function renderInline(text: string) {
+  const parts = text.split(/(`[^`]+`|\[[^\]]+\]\([^)]+\))/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <code key={index}>{part.slice(1, -1)}</code>;
+    }
+
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) {
+      return (
+        <a href={link[2]} key={index}>
+          {link[1]}
+        </a>
+      );
+    }
+
+    return part;
+  });
 }
