@@ -174,6 +174,81 @@ const demos: Demo[] = [
     },
   },
   {
+    id: 'dialog',
+    label: 'dialog',
+    spec: {
+      name: 'form',
+      config: {
+        fields: [
+          {
+            key: 'title',
+            widget: {
+              name: 'text-editor',
+              config: {
+                placeholder: 'title',
+                defaultValue: '',
+              },
+            },
+          },
+          {
+            key: 'settings',
+            widget: {
+              name: 'dialog',
+              config: {
+                title: 'Edit settings',
+                buttonText: 'Edit settings',
+                widget: {
+                  name: 'form',
+                  config: {
+                    fields: [
+                      {
+                        key: 'summary',
+                        widget: {
+                          name: 'text-editor',
+                          config: {
+                            placeholder: 'summary',
+                            defaultValue: '',
+                            multiline: true,
+                          },
+                        },
+                      },
+                      {
+                        key: 'featured',
+                        widget: {
+                          name: 'checkbox',
+                          config: {
+                            defaultValue: false,
+                            text: 'Featured',
+                          },
+                        },
+                      },
+                      {
+                        key: 'priority',
+                        widget: {
+                          name: 'slider',
+                          config: {
+                            min: 1,
+                            max: 5,
+                            step: 1,
+                            defaultValue: 3,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          {
+            key: 'type',
+            value: 'dialog-demo',
+          },
+        ],
+      },
+    },
+  },
+  {
     id: 'map',
     label: 'map',
     spec: {
@@ -596,6 +671,9 @@ function HomePage({
           </HomeCard>
           <HomeCard title="List of forms" action="Open list of forms" onClick={() => onOpenCase('list-form')}>
             A list item can be a full form, producing an array of structured objects.
+          </HomeCard>
+          <HomeCard title="Dialog wrapper" action="Open dialog" onClick={() => onOpenCase('dialog')}>
+            A child widget can be collapsed into a button and edited in a modal dialog.
           </HomeCard>
           <HomeCard title="Table" action="Open table" onClick={() => onOpenCase('table')}>
             Table rows are objects. Fixed value columns participate in output without being rendered.

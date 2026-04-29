@@ -4,6 +4,8 @@
 
 widget DSL 的顶层字段为 `name`，widget 专属参数放在 `config` 内。
 
+`dialog` 是透明包装 widget。它不改变子 widget 的输出类型，只改变编辑入口。
+
 ## string
 
 - [text-editor](/Users/chengshaofei/code/jfather/docs/widgets/text-editor.md)
@@ -44,5 +46,8 @@ array 组分为普通列表、表格型 object 数组和复选列表。
 
 - [select](/Users/chengshaofei/code/jfather/docs/widgets/select.md)
 - [radio-list](/Users/chengshaofei/code/jfather/docs/widgets/radio-list.md)
+- [dialog](/Users/chengshaofei/code/jfather/docs/widgets/dialog.md)
 
 `select` 和 `radio-list` 的选项值可以是任意 JSON 值，因此归入 any。
+
+`dialog` 的输出值来自它包装的子 widget，因此也可以输出任意 JSON 值。

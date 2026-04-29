@@ -4,6 +4,7 @@ import examples from '../docs/examples.md?raw';
 import overview from '../docs/overview.md?raw';
 import checkboxList from '../docs/widgets/checkbox-list.md?raw';
 import checkbox from '../docs/widgets/checkbox.md?raw';
+import dialog from '../docs/widgets/dialog.md?raw';
 import form from '../docs/widgets/form.md?raw';
 import image from '../docs/widgets/image.md?raw';
 import list from '../docs/widgets/list.md?raw';
@@ -107,6 +108,12 @@ export const docs: DocEntry[] = [
     label: 'table',
     path: 'docs/widgets/table.md',
     content: table,
+  },
+  {
+    id: 'dialog',
+    label: 'dialog',
+    path: 'docs/widgets/dialog.md',
+    content: dialog,
   },
   {
     id: 'select',

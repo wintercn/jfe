@@ -143,6 +143,11 @@ export function getDefaultValue(spec: WidgetSpec): JsonValue {
     case 'table':
       return [];
 
+    case 'dialog': {
+      const childWidget = asWidget(config.widget);
+      return childWidget ? getDefaultValue(childWidget) : null;
+    }
+
     default:
       return null;
   }

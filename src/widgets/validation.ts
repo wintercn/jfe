@@ -1,4 +1,4 @@
-import { asConfig, asNumber, asOptions, asString, deepEqual, isPlainObject } from './json';
+import { asConfig, asNumber, asOptions, asString, asWidget, deepEqual, isPlainObject } from './json';
 import type { JsonValue, WidgetSpec } from './types';
 
 export function validateValue(spec: WidgetSpec, value: JsonValue | undefined): string | undefined {
@@ -21,6 +21,10 @@ export function validateValue(spec: WidgetSpec, value: JsonValue | undefined): s
       return validateMultiOption(config, value);
     case 'checkbox':
       return typeof value === 'boolean' ? undefined : 'Expected boolean.';
+    case 'dialog': {
+      const childWidget = asWidget(config.widget);
+      return childWidget ? validateValue(childWidget, value) : undefined;
+    }
     default:
       return undefined;
   }

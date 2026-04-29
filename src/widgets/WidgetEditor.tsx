@@ -47,6 +47,8 @@ export function WidgetEditor({ spec, value, onChange }: EditorProps) {
       return <ListEditor spec={spec} value={value} onChange={onChange} />;
     case 'table':
       return <TableEditor spec={spec} value={value} onChange={onChange} />;
+    case 'dialog':
+      return <DialogEditor spec={spec} value={value} onChange={onChange} />;
     default:
       return (
         <div className="unknown-widget">
@@ -472,6 +474,70 @@ function TableEditor({ spec, value, onChange }: EditorProps) {
       <button className="small-button" type="button" onClick={() => onChange([...rows, createRowFromColumns(columns)])}>
         Add
       </button>
+    </div>
+  );
+}
+
+function DialogEditor({ spec, value, onChange }: EditorProps) {
+  const config = asConfig(spec);
+  const childWidget = asWidget(config.widget) ?? { name: 'text-editor', config: { defaultValue: '' } };
+  const currentValue = value === undefined ? getDefaultValue(childWidget) : value;
+  const valueSignature = useMemo(() => formatJson(currentValue), [currentValue]);
+  const title = asString(config.title) ?? 'Edit';
+  const buttonText = asString(config.buttonText) ?? title;
+  const saveText = asString(config.saveText) ?? 'Save';
+  const cancelText = asString(config.cancelText) ?? 'Cancel';
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<JsonValue>(() => currentValue);
+
+  useEffect(() => {
+    if (!open) {
+      setDraft(currentValue);
+    }
+  }, [childWidget.name, open, valueSignature]);
+
+  return (
+    <div className="dialog-widget">
+      <button
+        className="small-button"
+        type="button"
+        onClick={() => {
+          setDraft(currentValue);
+          setOpen(true);
+        }}
+      >
+        {buttonText}
+      </button>
+      {open ? (
+        <div className="dialog-backdrop" role="presentation">
+          <div className="dialog-panel" role="dialog" aria-modal="true" aria-label={title}>
+            <div className="dialog-header">
+              <div className="dialog-title">{title}</div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setOpen(false)}>
+                x
+              </button>
+            </div>
+            <div className="dialog-body">
+              <WidgetEditor spec={childWidget} value={draft} onChange={setDraft} />
+            </div>
+            <div className="dialog-footer">
+              <button className="secondary-action" type="button" onClick={() => setOpen(false)}>
+                {cancelText}
+              </button>
+              <button
+                className="primary-action"
+                type="button"
+                onClick={() => {
+                  onChange(draft);
+                  setOpen(false);
+                }}
+              >
+                {saveText}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -666,6 +666,65 @@ button {
   line-height: 1;
 }
 
+.dialog-widget {
+  min-width: 0;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(31, 35, 40, 0.42);
+}
+
+.dialog-panel {
+  width: min(760px, 100%);
+  max-height: min(720px, calc(100vh - 48px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border: 1px solid #8c959f;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 16px 48px rgba(31, 35, 40, 0.22);
+}
+
+.dialog-header,
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.dialog-header {
+  justify-content: space-between;
+  border-bottom: 1px solid #d8dee4;
+  background: #f6f8fa;
+}
+
+.dialog-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.dialog-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.dialog-footer {
+  justify-content: flex-end;
+  border-top: 1px solid #d8dee4;
+}
+
 .code-block {
   height: calc(100% - 32px);
   margin: 0;
