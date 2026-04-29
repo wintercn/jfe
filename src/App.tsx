@@ -10,7 +10,7 @@ type Demo = {
   spec: WidgetSpec;
 };
 
-type Mode = 'cases' | 'docs';
+type Mode = 'home' | 'cases' | 'docs';
 
 const demos: Demo[] = [
   {
@@ -379,7 +379,7 @@ const demos: Demo[] = [
 ];
 
 export function App() {
-  const [mode, setMode] = useState<Mode>('cases');
+  const [mode, setMode] = useState<Mode>('home');
   const [selectedId, setSelectedId] = useState(demos[0].id);
   const selectedDemo = useMemo(() => demos.find((demo) => demo.id === selectedId) ?? demos[0], [selectedId]);
   const [selectedDocId, setSelectedDocId] = useState(docs[0].id);
@@ -399,6 +399,13 @@ export function App() {
         <div className="brand">JFE Workbench</div>
         <div className="top-tabs" role="tablist" aria-label="Site sections">
           <button
+            className={mode === 'home' ? 'top-tab active' : 'top-tab'}
+            type="button"
+            onClick={() => setMode('home')}
+          >
+            Home
+          </button>
+          <button
             className={mode === 'cases' ? 'top-tab active' : 'top-tab'}
             type="button"
             onClick={() => setMode('cases')}
@@ -414,6 +421,18 @@ export function App() {
           </button>
         </div>
       </header>
+      {mode === 'home' ? (
+        <HomePage
+          onOpenCase={(id) => {
+            setSelectedId(id);
+            setMode('cases');
+          }}
+          onOpenDoc={(id) => {
+            setSelectedDocId(id);
+            setMode('docs');
+          }}
+        />
+      ) : (
       <div className="workspace">
         <aside className="sidebar">
           {mode === 'cases' ? (
@@ -489,6 +508,143 @@ export function App() {
           )}
         </aside>
       </div>
+      )}
+    </div>
+  );
+}
+
+function HomePage({
+  onOpenCase,
+  onOpenDoc,
+}: {
+  onOpenCase: (id: string) => void;
+  onOpenDoc: (id: string) => void;
+}) {
+  return (
+    <main className="home-page">
+      <section className="home-hero">
+        <div className="home-hero-copy">
+          <div className="eyebrow">JSON visual editor DSL</div>
+          <h1>Build structured JSON editors from composable widget definitions.</h1>
+          <p>
+            JFE turns a small declarative DSL into a working editor. Start with scalar widgets,
+            compose object and array editors, then inspect the output JSON beside the UI.
+          </p>
+          <div className="hero-actions">
+            <button className="primary-action" type="button" onClick={() => onOpenCase('form')}>
+              Open cases
+            </button>
+            <button className="secondary-action" type="button" onClick={() => onOpenDoc('overview')}>
+              Read docs
+            </button>
+          </div>
+        </div>
+        <div className="hero-preview" aria-label="DSL preview">
+          <div className="preview-title">form DSL</div>
+          <pre>{`{
+  "name": "form",
+  "config": {
+    "fields": [
+      {
+        "key": "title",
+        "widget": {
+          "name": "text-editor"
+        }
+      },
+      {
+        "key": "type",
+        "value": "article"
+      }
+    ]
+  }
+}`}</pre>
+        </div>
+      </section>
+
+      <section className="home-section">
+        <div className="section-heading">
+          <h2>Core model</h2>
+          <p>Everything is a widget. Complex editors are recursive compositions of smaller widgets.</p>
+        </div>
+        <div className="feature-grid">
+          <div className="feature-card">
+            <div className="feature-kicker">Scalar</div>
+            <h3>Text, number, boolean, URL, image</h3>
+            <p>Primitive widgets produce primitive JSON values and keep validation local to the field.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-kicker">Object</div>
+            <h3>form and map</h3>
+            <p>Use fixed fields for known object shapes, or editable keys for dynamic key-value objects.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-kicker">Array</div>
+            <h3>list, table, checkbox-list</h3>
+            <p>Edit repeated values, object rows, or option arrays while preserving JSON output order.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section">
+        <div className="section-heading">
+          <h2>Try the important cases</h2>
+          <p>These examples cover nesting, fixed values, object arrays, and arbitrary option values.</p>
+        </div>
+        <div className="case-grid">
+          <HomeCard title="Nested form" action="Open nested form" onClick={() => onOpenCase('nested-form')}>
+            Object fields can contain another form, and each layer contributes to the final JSON object.
+          </HomeCard>
+          <HomeCard title="List of forms" action="Open list of forms" onClick={() => onOpenCase('list-form')}>
+            A list item can be a full form, producing an array of structured objects.
+          </HomeCard>
+          <HomeCard title="Table" action="Open table" onClick={() => onOpenCase('table')}>
+            Table rows are objects. Fixed value columns participate in output without being rendered.
+          </HomeCard>
+          <HomeCard title="Choices" action="Open choices" onClick={() => onOpenCase('choices')}>
+            Select and radio options can output strings, numbers, booleans, arrays, or objects.
+          </HomeCard>
+        </div>
+      </section>
+
+      <section className="home-section docs-band">
+        <div>
+          <h2>Documentation</h2>
+          <p>Read the overview first, then use the widget catalog as the implementation contract.</p>
+        </div>
+        <div className="docs-actions">
+          <button className="secondary-action" type="button" onClick={() => onOpenDoc('overview')}>
+            Overview
+          </button>
+          <button className="secondary-action" type="button" onClick={() => onOpenDoc('builtin-widgets')}>
+            Widget catalog
+          </button>
+          <button className="secondary-action" type="button" onClick={() => onOpenDoc('examples')}>
+            Examples
+          </button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function HomeCard({
+  title,
+  action,
+  children,
+  onClick,
+}: {
+  title: string;
+  action: string;
+  children: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="home-card">
+      <h3>{title}</h3>
+      <p>{children}</p>
+      <button className="text-action" type="button" onClick={onClick}>
+        {action}
+      </button>
     </div>
   );
 }

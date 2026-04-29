@@ -1,5 +1,7 @@
 import builtinWidgets from '../docs/builtin-widgets-v0.1.md?raw';
 import dsl from '../docs/dsl-v0.1.md?raw';
+import examples from '../docs/examples.md?raw';
+import overview from '../docs/overview.md?raw';
 import checkboxList from '../docs/widgets/checkbox-list.md?raw';
 import checkbox from '../docs/widgets/checkbox.md?raw';
 import form from '../docs/widgets/form.md?raw';
@@ -22,6 +24,18 @@ export type DocEntry = {
 };
 
 export const docs: DocEntry[] = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    path: 'docs/overview.md',
+    content: overview,
+  },
+  {
+    id: 'examples',
+    label: 'Examples',
+    path: 'docs/examples.md',
+    content: examples,
+  },
   {
     id: 'builtin-widgets',
     label: 'Built-in widgets',
