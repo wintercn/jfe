@@ -2,7 +2,7 @@
 
 ## 1. 目标
 
-用于编辑单行字符串值，适合短文本（名称、标题、标识符、短描述）。
+用于编辑字符串值。默认单行，`config.multiline=true` 时为多行。
 
 ## 2. 适用类型
 
@@ -16,6 +16,7 @@
   "config": {
     "placeholder": "请输入名称",
     "defaultValue": "",
+    "multiline": false,
     "trim": true,
     "validation": {
       "minLength": 2,
@@ -38,12 +39,14 @@
 
 - `placeholder?: string`
 - `defaultValue?: string`
+- `multiline?: boolean`
 - `trim?: boolean`
 - `validation?: { minLength?: number; maxLength?: number; pattern?: string; patternFlags?: string; validator?: string; messages?: { minLength?: string; maxLength?: string; pattern?: string; validator?: string } }`
 
 ## 5. 交互定义
 
-- 输入方式：单行输入。
+- 输入方式：默认单行输入。
+- 当 `config.multiline=true` 时，使用多行输入。
 - 当 `config.trim=true` 时，对最终值执行首尾空白裁剪。
 
 ## 6. 数据契约
@@ -60,15 +63,17 @@
 - `validator` 为外部注册的校验器名，返回 `true` 或错误码字符串。
 - `messages` 用于覆盖各规则默认错误文案。
 - 执行顺序：`minLength/maxLength -> pattern -> validator`。
-- 不处理多行文本，换行符在输入时移除。
+- 当 `config.multiline=true` 时，保留换行符。
 
 ## 8. 界面定义
 
 - 组件由输入框区域构成。
-- 输入框为单行文本框，显示顺序：当前值优先，其次 `config.defaultValue`，最后空字符串。
+- `config.multiline=true` 时，输入框为多行文本框；否则为单行文本框。
+- 输入框显示顺序：当前值优先，其次 `config.defaultValue`，最后空字符串。
 - `config.placeholder` 仅在当前显示值为空字符串时展示。
 - 校验失败时，在输入框下方展示单行错误文案（来自 `config.validation.messages` 或系统默认文案）。
 
 ## 9. 可访问性
 
-- 使用原生 `input[type=text]`。
+- 单行模式使用原生 `input[type=text]`。
+- 多行模式使用原生 `textarea`。
